@@ -2,7 +2,7 @@ Absolutely! Here's a complete `README.md` file for your **Flutter Weather App** 
 
 ---
 
-```markdown
+
 # 🌦️ Flutter Weather App with BLoC Pattern
 
 A beautifully designed and responsive weather application built using **Flutter** and the **BLoC** architecture. The app uses the `geolocator` package to fetch the user's real-time location and displays current weather data powered by the OpenWeatherMap API. It features a clean, glassmorphic UI with dynamic weather visuals.
