@@ -16,3 +16,15 @@ class WeatherFetchEvent extends WeatherBlocEvent{
   List<Object> get props => [pos];
 
 }
+
+class WeatherFetchByCityEvent extends WeatherBlocEvent{
+  final String city;
+  WeatherFetchByCityEvent(this.city);
+}
+
+class WeatherFetchFiveDaysForecast extends WeatherBlocEvent{
+  final String city;
+
+  WeatherFetchFiveDaysForecast({required this.city});
+
+}

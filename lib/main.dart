@@ -6,7 +6,12 @@ import 'package:weather_app/bloc/weather_bloc_bloc.dart';
 import 'package:weather_app/screens/home_page.dart';
 
 void main() async {
-  runApp( const MyApp());
+  runApp(
+    BlocProvider(
+      create: (_)=>WeatherBlocBloc(),
+      child: MyApp(),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {

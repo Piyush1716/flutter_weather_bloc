@@ -20,3 +20,12 @@ final class WeatherBlocSuccess extends WeatherBlocState {
   @override
   List<Object> get props => [weather];
 }
+
+class FiveDayForeCastSuccess extends WeatherBlocState{
+  final List<Weather> fiveDayForecast;
+
+  FiveDayForeCastSuccess({required this.fiveDayForecast});
+
+  @override
+  List<Object> get props => [fiveDayForecast];
+}

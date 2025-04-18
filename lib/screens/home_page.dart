@@ -1,10 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/weather.dart';
 import 'package:weather_app/bloc/weather_bloc_bloc.dart';
+import 'package:weather_app/screens/forecasting_page.dart';
+import 'package:weather_app/ui/helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,7 +18,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  String getGreeting(int hour) {
 
+    if (hour >= 5 && hour < 12) {
+      return 'Good Morning';
+    } else if (hour >= 12 && hour < 17) {
+      return 'Good Afternoon';
+    } else if (hour >= 17 && hour < 21) {
+      return 'Good Evening';
+    } else {
+      return 'Good Night';
+    }
+  }
   String getWeatherImage(int code){
     switch(code){
       case >=200 && <300:
@@ -37,6 +51,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _refresh(String city) async {
+    Position pos = await _determinePosition();
+    context.read<WeatherBlocBloc>().add(WeatherFetchByCityEvent(city));
+  }
+
+  void _enterCity(BuildContext context){
+    final TextEditingController _city_ctrl = TextEditingController();
+    showDialog(
+      context: context, 
+      builder: (context){
+        return AlertDialog(
+          title: Text("Search By City"),
+          content: TextField(
+            controller: _city_ctrl,
+            decoration: InputDecoration(hintText: "Enter City"),
+          ),
+          actions: [
+            TextButton(onPressed: ()=> Navigator.of(context).pop(), child: Text("Cancel")),
+            TextButton(onPressed: (){
+                Navigator.of(context).pop();
+                _refresh(_city_ctrl.text.toString());
+              }, 
+              child: Text("Ok")
+            )
+          ],
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,41 +97,7 @@ class _HomePageState extends State<HomePage> {
           height: MediaQuery.of(context).size.height,
           child: Stack(
             children: [
-              Align(
-                alignment: AlignmentDirectional(3, -.3),
-                child: Container(
-                  height: 350,
-                  width: 350,
-                  decoration: BoxDecoration(
-                      color: Colors.deepPurple, shape: BoxShape.circle),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional(-3, -.3),
-                child: Container(
-                  height: 350,
-                  width: 350,
-                  decoration: BoxDecoration(
-                      color: Colors.deepPurple, shape: BoxShape.circle),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional(0, -1.2),
-                child: Container(
-                  height: 350,
-                  width: 400,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 221, 115, 9),
-                  ),
-                ),
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-                child: Container(
-                  decoration: BoxDecoration(color: Colors.transparent),
-                ),
-              ),
-
+              BlurryBackground(),
               BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
                 builder: (context, state) {
                   if(state is WeatherBlocLoading){
@@ -104,13 +114,35 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${weather.areaName}',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w300),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${weather.areaName}',
+                              style: TextStyle(
+                                  color: Colors.white, fontWeight: FontWeight.w300),
+                            ),
+                            IconButton(
+                                onPressed: () => _enterCity(context),
+                                icon: Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                )),
+                            IconButton(
+                                onPressed: (){
+                                  final String city = state.weather.areaName ?? 'Anand';
+                                  Navigator.push(context, MaterialPageRoute(
+                                    builder:(context) => BlocProvider.value(value: context.read<WeatherBlocBloc>(),child: ForeCast(city: city,),)
+                                  ));
+                                },
+                                icon: Icon(
+                                  Icons.thunderstorm,
+                                  color: Colors.white,
+                                )),
+                          ],
                         ),
                         Text(
-                          'Good Moring',
+                          getGreeting(weather.date!.hour),
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 25,
@@ -214,42 +246,47 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class small_widget extends StatelessWidget {
-  final String imgPath;
-  final String top;
-  final String bottom;
 
-  const small_widget({
-    super.key,
-    required this.imgPath, 
-    required this.top, 
-    required this.bottom,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Image.asset(
-          imgPath,
-          width: 60,
-          height: 60,
-        ),
-        SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${top}',
-              style: TextStyle(color: Colors.white24, fontSize: 15),
-            ),
-            Text(
-              '${bottom}',
-              style: TextStyle(color: Colors.white70, fontSize: 15),
-            ),
-          ],
-        )
-      ],
-    );
+
+
+/// Determine the current position of the device.
+///
+/// When the location services are not enabled or permissions
+/// are denied the `Future` will return an error.
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the 
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
   }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale 
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+  
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately. 
+    return Future.error(
+      'Location permissions are permanently denied, we cannot request permissions.');
+  } 
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }
