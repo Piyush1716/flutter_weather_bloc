@@ -60,7 +60,7 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
           w.add(weather);
         }
         // print("foreCast");
-        // print(w);
+        // print(w[0]);
         // print("Position");
         // print(event.pos);
 

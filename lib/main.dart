@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/bloc/weather_bloc_bloc.dart';
+import 'package:weather_app/screens/forecasting_page.dart';
 import 'package:weather_app/screens/home_page.dart';
 
 void main() async {
@@ -26,22 +27,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: FutureBuilder(
-          future: _determinePosition(),
-          builder: (context, snap) {
-            if(snap.hasData){
-                return BlocProvider<WeatherBlocBloc>(
-                  create: (context) => WeatherBlocBloc()..add(WeatherFetchEvent(pos: snap.data as Position)),
-                  child: HomePage(),
-                );
-            }
-            else{
-              return Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-          }
-        ));
+        home: ForeCast(city: "city")
+        );
   }
 }
 

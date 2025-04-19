@@ -33,21 +33,21 @@ class _HomePageState extends State<HomePage> {
   String getWeatherImage(int code){
     switch(code){
       case >=200 && <300:
-        return "assets/1.png";
+        return "assets/png/1.png";
       case >=300 && <400:
-        return "assets/2.png";
+        return "assets/png/2.png";
       case >=500 && <600:
-        return "assets/3.png";
+        return "assets/png/3.png";
       case >=600 && <700:
-        return "assets/4.png";
+        return "assets/png/4.png";
       case >=700 && <800:
-        return "assets/5.png";
+        return "assets/png/5.png";
       case == 800:
-        return 'assets/6.png';
+        return 'assets/png/6.png';
       case >800 && <=804:
-        return "assets/7.png";
+        return "assets/png/7.png";
       default:
-        return "assets/1.png";
+        return "assets/png/1.png";
     }
   }
 
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 small_widget(
-                                  imgPath: 'assets/11.png',
+                                  imgPath: 'assets/png/11.png',
                                   top: 'Sunrise',
                                   bottom: DateFormat('h:mm a').format(weather.sunrise!),
                                 ),
@@ -196,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                                   width: 25,
                                 ),
                                 small_widget(
-                                  imgPath: 'assets/12.png',
+                                  imgPath: 'assets/png/12.png',
                                   top: 'Sunset',
                                   bottom: DateFormat('h:mm a').format(weather.sunset!),
                                 ),
@@ -211,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 small_widget(
-                                  imgPath: 'assets/13.png',
+                                  imgPath: 'assets/png/13.png',
                                   top: 'Temp Max',
                                   bottom: '${weather.tempMax!.celsius!.round()}°C',
                                 ),
@@ -219,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                                   width: 25,
                                 ),
                                 small_widget(
-                                  imgPath: 'assets/14.png',
+                                  imgPath: 'assets/png/14.png',
                                   top: 'Temp Min',
                                   bottom: '${weather.tempMin!.celsius!.round()}°C',
                                 ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:weather/weather.dart';
 import 'package:weather_app/bloc/weather_bloc_bloc.dart';
-import 'package:weather_app/ui/helper.dart';
 
 class ForeCast extends StatefulWidget {
   String city;
@@ -40,7 +40,7 @@ class _ForeCastState extends State<ForeCast> {
                     return ListView.builder(
                       itemCount: state.fiveDayForecast.length,
                       itemBuilder: (context, index){
-                        return WeatherCard(wether: state.fiveDayForecast[index],);
+                        return WeatherCardFancy(weather: state.fiveDayForecast[index],);
                       }
                     );
                   }
@@ -49,69 +49,6 @@ class _ForeCastState extends State<ForeCast> {
                   }
                 },
               )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class WeatherCard extends StatelessWidget {
-  final Weather wether;
-  const WeatherCard({super.key, required this.wether});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: ClipPath(
-        clipper: WeatherCardClipper(),
-        child: Container(
-          width: double.infinity,
-          height: 190,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF5936B4), Color(0xFF362a84)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Left - Temperature & location
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${wether.temperature!.celsius!.round()}°C',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 56,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 6),
-                    Text('H:16°  L:8°', style: TextStyle(color: Colors.white70)),
-                    SizedBox(height: 16),
-                    Text('${wether.areaName}',
-                        style: TextStyle(color: Colors.white, fontSize: 18)),
-                  ],
-                ),
-              ),
-              // Right - Icon and text
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/1.png', width: 90), // Use your asset
-                  const SizedBox(height: 8),
-                  Text(wether.weatherDescription! , style: TextStyle(color: Colors.white)),
-                ],
-              ),
             ],
           ),
         ),
@@ -149,3 +86,107 @@ class WeatherCardClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
+
+
+class WeatherCardFancy extends StatelessWidget {
+  final Weather weather;
+
+  const WeatherCardFancy({super.key, required this.weather});
+
+  String getWeatherImage(int code) {
+    switch (code) {
+      case >= 200 && < 300:
+        return "assets/png/1.png";
+      case >= 300 && < 400:
+        return "assets/png/2.png";
+      case >= 500 && < 600:
+        return "assets/png/3.png";
+      case >= 600 && < 700:
+        return "assets/png/4.png";
+      case >= 700 && < 800:
+        return "assets/png/5.png";
+      case == 800:
+        return 'assets/png/6.png';
+      case > 800 && <= 804:
+        return "assets/png/7.png";
+      default:
+        return "assets/png/1.png";
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: SizedBox(
+        height: 180, // Adjust height based on design
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Clipped card
+            ClipPath(
+              clipper: WeatherCardClipper(),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF5936B4), Color(0xFF362a84)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // Temperature & details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${weather.temperature!.celsius!.round()}°',
+                            style: const TextStyle(fontFamily: "Raleway", 
+                                color: Colors.white,
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                              'H:${weather.tempMax!.celsius!.round()}°  L:${weather.tempMin!.celsius!.round()}°',
+                              style: TextStyle(fontFamily: "Raleway", color: Colors.white70)),
+                          const SizedBox(height: 8),
+                          Text('${weather.areaName}, ${weather.country}',
+                              style: const TextStyle(fontFamily: "Raleway", 
+                                  color: Colors.white, fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                    // Description
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 100),
+                        Text(weather.weatherDescription ?? '',
+                            style: const TextStyle(fontFamily: "Raleway", color: Colors.white70)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      
+            // Floating Image (right-top overlap)
+            Positioned(
+              right: 0,
+              top: -20, // Pull it up above the card
+              child: Image.asset(getWeatherImage(weather.weatherConditionCode!), height: 180,)
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
