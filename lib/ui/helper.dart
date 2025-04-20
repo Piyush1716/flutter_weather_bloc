@@ -72,11 +72,11 @@ class small_widget extends StatelessWidget {
           children: [
             Text(
               '${top}',
-              style: TextStyle(color: Colors.white24, fontSize: 15),
+              style: TextStyle(fontFamily: "Raleway", color: Colors.white24, fontSize: 15),
             ),
             Text(
               '${bottom}',
-              style: TextStyle(color: Colors.white70, fontSize: 15),
+              style: TextStyle(fontFamily: "Raleway", color: Colors.white70, fontSize: 15),
             ),
           ],
         )

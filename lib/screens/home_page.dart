@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,9 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   String getGreeting(int hour) {
-
     if (hour >= 5 && hour < 12) {
       return 'Good Morning';
     } else if (hour >= 12 && hour < 17) {
@@ -30,54 +29,126 @@ class _HomePageState extends State<HomePage> {
       return 'Good Night';
     }
   }
-  String getWeatherImage(int code){
-    switch(code){
-      case >=200 && <300:
+
+  String getWeatherImage(int code) {
+    switch (code) {
+      case >= 200 && < 300:
         return "assets/png/1.png";
-      case >=300 && <400:
+      case >= 300 && < 400:
         return "assets/png/2.png";
-      case >=500 && <600:
+      case >= 500 && < 600:
         return "assets/png/3.png";
-      case >=600 && <700:
+      case >= 600 && < 700:
         return "assets/png/4.png";
-      case >=700 && <800:
+      case >= 700 && < 800:
         return "assets/png/5.png";
       case == 800:
         return 'assets/png/6.png';
-      case >800 && <=804:
+      case > 800 && <= 804:
         return "assets/png/7.png";
       default:
         return "assets/png/1.png";
     }
   }
 
-  Future<void> _refresh(String city) async {
-    Position pos = await _determinePosition();
+  Future<void> _searchByCity(String city) async {
     context.read<WeatherBlocBloc>().add(WeatherFetchByCityEvent(city));
   }
 
-  void _enterCity(BuildContext context){
-    final TextEditingController _city_ctrl = TextEditingController();
+  Future<void> _refresh() async {
+    Position pos = await _determinePosition();
+    context.read<WeatherBlocBloc>().add(WeatherFetchEvent(pos: pos));
+  }
+
+  void _enterCity(BuildContext context) {
+    final TextEditingController _cityCtrl = TextEditingController();
+
     showDialog(
-      context: context, 
-      builder: (context){
-        return AlertDialog(
-          title: Text("Search By City"),
-          content: TextField(
-            controller: _city_ctrl,
-            decoration: InputDecoration(hintText: "Enter City"),
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6), // translucent background
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Search by City",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: "Raleway",
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: _cityCtrl,
+                      style: TextStyle(color: Colors.white),
+                      cursorColor: Colors.white70,
+                      decoration: InputDecoration(
+                        hintText: "Enter City Name",
+                        hintStyle: TextStyle(color: Colors.white38),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text("Cancel",
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 2,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _searchByCity(_cityCtrl.text.toString());
+                          },
+                          child: Text("OK",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Raleway")),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
-          actions: [
-            TextButton(onPressed: ()=> Navigator.of(context).pop(), child: Text("Cancel")),
-            TextButton(onPressed: (){
-                Navigator.of(context).pop();
-                _refresh(_city_ctrl.text.toString());
-              }, 
-              child: Text("Ok")
-            )
-          ],
         );
-      }
+      },
     );
   }
 
@@ -100,140 +171,168 @@ class _HomePageState extends State<HomePage> {
               BlurryBackground(),
               BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
                 builder: (context, state) {
-                  if(state is WeatherBlocLoading){
+                  if (state is WeatherBlocLoading) {
                     return Center(child: CircularProgressIndicator());
-                  }
-                  else if(state is WeatherBlocInitial){
+                  } else if (state is WeatherBlocInitial) {
                     return Center(child: CircularProgressIndicator());
-                  }
-                  else if(state is WeatherBlocSuccess ){
+                  } else if (state is WeatherBlocSuccess) {
                     final Weather weather = state.weather;
                     return SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${weather.areaName}',
-                              style: TextStyle(
-                                  color: Colors.white, fontWeight: FontWeight.w300),
-                            ),
-                            IconButton(
-                                onPressed: () => _enterCity(context),
-                                icon: Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                )),
-                            IconButton(
-                                onPressed: (){
-                                  final String city = state.weather.areaName ?? 'Anand';
-                                  Navigator.push(context, MaterialPageRoute(
-                                    builder:(context) => BlocProvider.value(value: context.read<WeatherBlocBloc>(),child: ForeCast(city: city,),)
-                                  ));
-                                },
-                                icon: Icon(
-                                  Icons.thunderstorm,
-                                  color: Colors.white,
-                                )),
-                          ],
-                        ),
-                        Text(
-                          getGreeting(weather.date!.hour),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Center(
-                          child: Image.asset(
-                              width: 275, height: 275, getWeatherImage(weather.weatherConditionCode!)),
-                        ),
-                        Center(
-                          child: Text(
-                            '${weather.temperature!.celsius!.round()}°C',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 45,
-                                fontWeight: FontWeight.w600),
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${weather.areaName}',
+                                style: TextStyle(
+                                    fontFamily: "Raleway",
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w300),
+                              ),
+                              IconButton(
+                                  onPressed: () => _enterCity(context),
+                                  icon: Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                  )),
+                            ],
                           ),
-                        ),
-                        Center(
-                          child: Text(
-                            weather.weatherMain!.toUpperCase(),
+                          Text(
+                            getGreeting(weather.date!.hour),
                             style: TextStyle(
+                                fontFamily: "Raleway",
                                 color: Colors.white,
                                 fontSize: 25,
-                                fontWeight: FontWeight.w500),
+                                fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        Center(
-                          child: Text(
-                            '${DateFormat('EEEE d . h:mm a').format(weather.date!)}',
-                            style: TextStyle(
-                                color: Colors.white24,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500),
+                          Center(
+                            child: Image.asset(
+                                width: 250,
+                                height: 250,
+                                getWeatherImage(weather.weatherConditionCode!)),
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                small_widget(
-                                  imgPath: 'assets/png/11.png',
-                                  top: 'Sunrise',
-                                  bottom: DateFormat('h:mm a').format(weather.sunrise!),
-                                ),
-                                SizedBox(
-                                  width: 25,
-                                ),
-                                small_widget(
-                                  imgPath: 'assets/png/12.png',
-                                  top: 'Sunset',
-                                  bottom: DateFormat('h:mm a').format(weather.sunset!),
-                                ),
-                              ],
+                          Center(
+                            child: Text(
+                              '${weather.temperature!.celsius!.round()}°C',
+                              style: TextStyle(
+                                  fontFamily: "Raleway",
+                                  color: Colors.white,
+                                  fontSize: 45,
+                                  fontWeight: FontWeight.w600),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 5.0),
-                              child: Divider(color: Colors.grey[800]),
+                          ),
+                          Center(
+                            child: Text(
+                              weather.weatherMain!,
+                              style: TextStyle(
+                                  fontFamily: "Raleway",
+                                  color: Colors.white,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w500),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                small_widget(
-                                  imgPath: 'assets/png/13.png',
-                                  top: 'Temp Max',
-                                  bottom: '${weather.tempMax!.celsius!.round()}°C',
-                                ),
-                                SizedBox(
-                                  width: 25,
-                                ),
-                                small_widget(
-                                  imgPath: 'assets/png/14.png',
-                                  top: 'Temp Min',
-                                  bottom: '${weather.tempMin!.celsius!.round()}°C',
-                                ),
-                              ],
+                          ),
+                          Center(
+                            child: Text(
+                              '${DateFormat('EEEE d . h:mm a').format(weather.date!)}',
+                              style: TextStyle(
+                                  fontFamily: "Raleway",
+                                  color: Colors.white24,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500),
                             ),
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                  }
-                  else{
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  small_widget(
+                                    imgPath: 'assets/png/11.png',
+                                    top: 'Sunrise',
+                                    bottom: DateFormat('h:mm a')
+                                        .format(weather.sunrise!),
+                                  ),
+                                  SizedBox(
+                                    width: 25,
+                                  ),
+                                  small_widget(
+                                    imgPath: 'assets/png/12.png',
+                                    top: 'Sunset',
+                                    bottom: DateFormat('h:mm a')
+                                        .format(weather.sunset!),
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 5.0),
+                                child: Divider(color: Colors.grey[800]),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  small_widget(
+                                    imgPath: 'assets/png/13.png',
+                                    top: 'Temp Max',
+                                    bottom:
+                                        '${weather.tempMax!.celsius!.round()}°C',
+                                  ),
+                                  SizedBox(
+                                    width: 25,
+                                  ),
+                                  small_widget(
+                                    imgPath: 'assets/png/14.png',
+                                    top: 'Temp Min',
+                                    bottom:
+                                        '${weather.tempMin!.celsius!.round()}°C',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
                     return Center(
-                      child: Text("Error Occured"),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "An error occurred.",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.1),
+                              foregroundColor: Colors.white70,
+                              shadowColor: Colors.white24,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.white10),
+                              ),
+                            ),
+                            onPressed: () {
+                              _refresh();
+                            },
+                            icon: Icon(Icons.refresh),
+                            label: Text("Retry"),
+                          )
+                        ],
+                      ),
                     );
                   }
                 },
@@ -242,13 +341,32 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      floatingActionButton: BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
+        builder: (context, state) {
+          if(state is WeatherBlocSuccess){
+            return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider.value(
+                    value: context.read<WeatherBlocBloc>(),
+                    child: ForeCast(),
+                  ),
+                ),
+              );
+            },
+            child: SvgPicture.asset("assets/svg/Map.svg"),
+          );
+          }else{
+            return SizedBox();
+          }
+          
+        },
+      ),
     );
   }
 }
-
-
-
-
 
 /// Determine the current position of the device.
 ///
@@ -262,7 +380,7 @@ Future<Position> _determinePosition() async {
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     // Location services are not enabled don't continue
-    // accessing the position and request users of the 
+    // accessing the position and request users of the
     // App to enable the location services.
     return Future.error('Location services are disabled.');
   }
@@ -273,18 +391,18 @@ Future<Position> _determinePosition() async {
     if (permission == LocationPermission.denied) {
       // Permissions are denied, next time you could try
       // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale 
+      // Android's shouldShowRequestPermissionRationale
       // returned true. According to Android guidelines
       // your App should show an explanatory UI now.
       return Future.error('Location permissions are denied');
     }
   }
-  
+
   if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately. 
+    // Permissions are denied forever, handle appropriately.
     return Future.error(
-      'Location permissions are permanently denied, we cannot request permissions.');
-  } 
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.

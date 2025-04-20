@@ -20,10 +20,10 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         Weather weather = await wf.currentWeatherByLocation(lat, lon);
         // List<Weather> ws = await wf.fiveDayForecastByCityName("anand");
         
-        // print("weather");
-        // print(ws.length);
-        // print("Position");
-        // print(event.pos);
+        print("weather");
+        print(weather);
+        print("Position");
+        print(event.pos);
 
         emit(WeatherBlocSuccess(weather));
       }catch(e){
@@ -47,7 +47,7 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         emit(WeatherBlocFailure());
       }
     });
-    on<WeatherFetchFiveDaysForecast>((event, emit) async{
+    on<FetchTopCitiesWeather>((event, emit) async{
       emit(WeatherBlocLoading());
       try{
         String key = api_key;

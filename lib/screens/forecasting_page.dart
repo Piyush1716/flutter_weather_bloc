@@ -1,13 +1,13 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:weather/weather.dart';
 import 'package:weather_app/bloc/weather_bloc_bloc.dart';
+import 'package:weather_app/ui/helper.dart';
 
 class ForeCast extends StatefulWidget {
-  String city;
-  ForeCast({required this.city});
-
   @override
   State<ForeCast> createState() => _ForeCastState();
 }
@@ -17,20 +17,25 @@ class _ForeCastState extends State<ForeCast> {
     super.initState();
     context
         .read<WeatherBlocBloc>()
-        .add(WeatherFetchFiveDaysForecast(city: widget.city));
+        .add(FetchTopCitiesWeather());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF2e335a),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Text("Top Cities Weather", style: TextStyle(fontFamily: "Raleway"),),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Stack(
             children: [
-              // BlurryBackground(),
+              BlurryBackground(),
               BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
                 builder: (context, state){
                   if(state is WeatherBlocLoading){
@@ -114,27 +119,37 @@ class WeatherCardFancy extends StatelessWidget {
     }
   }
 
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
-      child: SizedBox(
-        height: 180, // Adjust height based on design
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Clipped card
-            ClipPath(
-              clipper: WeatherCardClipper(),
+@override
+Widget build(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 20.0),
+    child: SizedBox(
+      height: 180,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Clipped glass card
+          ClipPath(
+            clipper: WeatherCardClipper(),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
                   gradient: LinearGradient(
-                    colors: [Color(0xFF5936B4), Color(0xFF362a84)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    colors: [
+                        Colors.white.withOpacity(0.50), // More opaque
+                        Colors.white.withOpacity(0.505) // More transparent
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                   ),
                 ),
                 child: Row(
@@ -147,46 +162,67 @@ class WeatherCardFancy extends StatelessWidget {
                         children: [
                           Text(
                             '${weather.temperature!.celsius!.round()}°',
-                            style: const TextStyle(fontFamily: "Raleway", 
-                                color: Colors.white,
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontFamily: "Raleway",
+                              color: Colors.white,
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                              'H:${weather.tempMax!.celsius!.round()}°  L:${weather.tempMin!.celsius!.round()}°',
-                              style: TextStyle(fontFamily: "Raleway", color: Colors.white70)),
+                            'H:${weather.tempMax!.celsius!.round()}°  L:${weather.tempMin!.celsius!.round()}°',
+                            style: const TextStyle(
+                              fontFamily: "Raleway",
+                              color: Colors.white70,
+                              fontSize: 20,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          Text('${weather.areaName}, ${weather.country}',
-                              style: const TextStyle(fontFamily: "Raleway", 
-                                  color: Colors.white, fontSize: 16)),
+                          Text(
+                            '${weather.areaName}, ${weather.country}',
+                            style: const TextStyle(
+                              fontFamily: "Raleway",
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    // Description
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 100),
-                        Text(weather.weatherDescription ?? '',
-                            style: const TextStyle(fontFamily: "Raleway", color: Colors.white70)),
+                        Text(
+                          weather.weatherDescription ?? '',
+                          style: const TextStyle(
+                            fontFamily: "Raleway",
+                            color: Colors.white70,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-      
-            // Floating Image (right-top overlap)
-            Positioned(
-              right: 0,
-              top: -20, // Pull it up above the card
-              child: Image.asset(getWeatherImage(weather.weatherConditionCode!), height: 180,)
+          ),
+
+          // Floating Image
+          Positioned(
+            right: 0,
+            top: -20,
+            child: Image.asset(
+              getWeatherImage(weather.weatherConditionCode!),
+              height: 180,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
 

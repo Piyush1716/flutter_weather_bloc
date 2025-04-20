@@ -22,9 +22,4 @@ class WeatherFetchByCityEvent extends WeatherBlocEvent{
   WeatherFetchByCityEvent(this.city);
 }
 
-class WeatherFetchFiveDaysForecast extends WeatherBlocEvent{
-  final String city;
-
-  WeatherFetchFiveDaysForecast({required this.city});
-
-}
+class FetchTopCitiesWeather extends WeatherBlocEvent{}
