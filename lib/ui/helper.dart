@@ -45,12 +45,12 @@ class BlurryBackground extends StatelessWidget {
   }
 }
 
-class small_widget extends StatelessWidget {
+class SmallCard extends StatelessWidget {
   final String imgPath;
   final String top;
   final String bottom;
 
-  const small_widget({
+  const SmallCard({
     super.key,
     required this.imgPath,
     required this.top,
@@ -72,11 +72,11 @@ class small_widget extends StatelessWidget {
           children: [
             Text(
               '${top}',
-              style: TextStyle(fontFamily: "Raleway", color: Colors.white24, fontSize: 15),
+              style: TextStyle(fontFamily: "Raleway", color: Colors.white38, fontSize: 15),
             ),
             Text(
               '${bottom}',
-              style: TextStyle(fontFamily: "Raleway", color: Colors.white70, fontSize: 15),
+              style: TextStyle(fontFamily: "Raleway", color: Colors.white, fontSize: 15),
             ),
           ],
         )
@@ -84,3 +84,5 @@ class small_widget extends StatelessWidget {
     );
   }
 }
+
+// update code and do like upper code which use size of screen

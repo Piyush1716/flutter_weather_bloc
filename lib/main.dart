@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:weather_app/bloc/weather_bloc_bloc.dart';
-import 'package:weather_app/screens/home_page.dart';
+import 'package:tmep/bloc/weather_bloc_bloc.dart';
+import 'package:tmep/screens/home_page.dart';
 
 void main() async {
   runApp(BlocProvider(
@@ -28,13 +28,20 @@ class MyApp extends StatelessWidget {
                 child: HomePage(),
               );
             }
-            else{
+            if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text("Failed to get location: ${snapshot.error}"),
+                ),
+              );
+            } else{
               return Scaffold(body: Center(child: CircularProgressIndicator(),));
             }
           }),
     );
   }
 }
+
 
 /// Determine the current position of the device.
 ///
@@ -74,5 +81,17 @@ Future<Position> _determinePosition() async {
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
+  Position curpos = await Geolocator.getCurrentPosition();
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  print(curpos.latitude);
+  print(curpos.longitude);
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  print("-----------------------------------------------");
+  
+  return curpos;
 }

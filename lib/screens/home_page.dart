@@ -1,15 +1,14 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tmep/bloc/weather_bloc_bloc.dart';
+import 'package:tmep/screens/top_cities_weather.dart';
+import 'package:tmep/ui/helper.dart';
 import 'package:weather/weather.dart';
-import 'package:weather_app/bloc/weather_bloc_bloc.dart';
-import 'package:weather_app/screens/forecasting_page.dart';
-import 'package:weather_app/ui/helper.dart';
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -99,10 +98,10 @@ class _HomePageState extends State<HomePage> {
                     TextField(
                       controller: _cityCtrl,
                       style: TextStyle(color: Colors.white),
-                      cursorColor: Colors.white70,
+                      cursorColor: Colors.white,
                       decoration: InputDecoration(
                         hintText: "Enter City Name",
-                        hintStyle: TextStyle(color: Colors.white38),
+                        hintStyle: TextStyle(color: Colors.white54),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.1),
                         border: OutlineInputBorder(
@@ -120,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () => Navigator.of(context).pop(),
                           child: Text("Cancel",
                               style: TextStyle(
-                                  color: Colors.white70,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.w500)),
                         ),
                         const SizedBox(width: 10),
@@ -154,6 +153,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       // appBar: AppBar(
@@ -163,7 +163,10 @@ class _HomePageState extends State<HomePage> {
       //       const SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
       // ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
+        padding: EdgeInsets.symmetric(
+          horizontal: size.width * 0.08,
+          vertical: size.height * 0.02,
+        ),
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Stack(
@@ -206,13 +209,13 @@ class _HomePageState extends State<HomePage> {
                             style: TextStyle(
                                 fontFamily: "Raleway",
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: size.width * 0.06,
                                 fontWeight: FontWeight.bold),
                           ),
                           Center(
                             child: Image.asset(
-                                width: 250,
-                                height: 250,
+                                width: size.width * 0.6,
+                                height: size.width * 0.6,
                                 getWeatherImage(weather.weatherConditionCode!)),
                           ),
                           Center(
@@ -221,7 +224,7 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(
                                   fontFamily: "Raleway",
                                   color: Colors.white,
-                                  fontSize: 45,
+                                  fontSize: size.width * 0.11,
                                   fontWeight: FontWeight.w600),
                             ),
                           ),
@@ -231,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(
                                   fontFamily: "Raleway",
                                   color: Colors.white,
-                                  fontSize: 25,
+                                  fontSize: size.width * 0.06,
                                   fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -240,60 +243,59 @@ class _HomePageState extends State<HomePage> {
                               '${DateFormat('EEEE d . h:mm a').format(weather.date!)}',
                               style: TextStyle(
                                   fontFamily: "Raleway",
-                                  color: Colors.white24,
-                                  fontSize: 16,
+                                  color: Colors.white38,
+                                  fontSize: size.width * 0.04,
                                   fontWeight: FontWeight.w500),
                             ),
                           ),
-                          SizedBox(
-                            height: 5,
-                          ),
+                          SizedBox(height: size.height * 0.018),
                           Column(
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  small_widget(
-                                    imgPath: 'assets/png/11.png',
-                                    top: 'Sunrise',
-                                    bottom: DateFormat('h:mm a')
-                                        .format(weather.sunrise!),
+                                  Flexible(
+                                    child: SmallCard(
+                                      imgPath: 'assets/png/11.png',
+                                      top: 'Sunrise',
+                                      bottom: DateFormat('h:mm a')
+                                          .format(weather.sunrise!),
+                                    ),
                                   ),
-                                  SizedBox(
-                                    width: 25,
-                                  ),
-                                  small_widget(
-                                    imgPath: 'assets/png/12.png',
-                                    top: 'Sunset',
-                                    bottom: DateFormat('h:mm a')
-                                        .format(weather.sunset!),
+                                  Flexible(
+                                    child: SmallCard(
+                                      imgPath: 'assets/png/12.png',
+                                      top: 'Sunset',
+                                      bottom: DateFormat('h:mm a')
+                                          .format(weather.sunset!),
+                                    ),
                                   ),
                                 ],
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5.0),
+                                padding: EdgeInsets.symmetric(vertical: size.height * 0.006),
                                 child: Divider(color: Colors.grey[800]),
                               ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: [
-                                  small_widget(
-                                    imgPath: 'assets/png/13.png',
-                                    top: 'Temp Max',
-                                    bottom:
-                                        '${weather.tempMax!.celsius!.round()}°C',
+                                  Flexible(
+                                    child: SmallCard(
+                                      imgPath: 'assets/png/13.png',
+                                      top: 'Temp Max',
+                                      bottom:
+                                          '${weather.tempMax!.celsius!.round()}°C',
+                                    ),
                                   ),
-                                  SizedBox(
-                                    width: 25,
-                                  ),
-                                  small_widget(
-                                    imgPath: 'assets/png/14.png',
-                                    top: 'Temp Min',
-                                    bottom:
-                                        '${weather.tempMin!.celsius!.round()}°C',
+                                  Flexible(
+                                    child: SmallCard(
+                                      imgPath: 'assets/png/14.png',
+                                      top: 'Temp Min',
+                                      bottom:
+                                          '${weather.tempMin!.celsius!.round()}°C',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -311,15 +313,15 @@ class _HomePageState extends State<HomePage> {
                             "An error occurred.",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: size.width * 0.046,
                             ),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: size.height * 0.012),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white.withOpacity(0.1),
-                              foregroundColor: Colors.white70,
-                              shadowColor: Colors.white24,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.white38,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(color: Colors.white10),

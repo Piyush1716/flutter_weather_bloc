@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tmep/api_key.dart';
 import 'package:weather/weather.dart';
-import 'package:weather_app/api_key.dart';
 
 part 'weather_bloc_event.dart';
 part 'weather_bloc_state.dart';
@@ -18,7 +18,6 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         WeatherFactory wf = WeatherFactory(key);
 
         Weather weather = await wf.currentWeatherByLocation(lat, lon);
-        // List<Weather> ws = await wf.fiveDayForecastByCityName("anand");
         
         print("weather");
         print(weather);
@@ -54,7 +53,7 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         WeatherFactory wf = WeatherFactory(key);
         List<Weather> w = [];
 
-        List<String> cities = ['New York', 'Tokyo', 'London', 'Algeria'];
+        List<String> cities = ['Mumbai','Delhi','Bengaluru','Chennai','Kolkata','Hyderabad','Ahmedabad','Pune','Jaipur','Varanasi',];
         for(String city in cities){
           Weather weather = await wf.currentWeatherByCityName(city);
           w.add(weather);
@@ -64,7 +63,7 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         // print("Position");
         // print(event.pos);
 
-        emit(FiveDayForeCastSuccess(fiveDayForecast: w));
+        emit(TopCitiesWetherSuccess(weathers: w));
       }catch(e){
         emit(WeatherBlocFailure());
       }

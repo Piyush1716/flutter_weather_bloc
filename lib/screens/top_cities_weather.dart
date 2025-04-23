@@ -2,10 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:tmep/bloc/weather_bloc_bloc.dart';
+import 'package:tmep/ui/helper.dart';
 import 'package:weather/weather.dart';
-import 'package:weather_app/bloc/weather_bloc_bloc.dart';
-import 'package:weather_app/ui/helper.dart';
 
 class ForeCast extends StatefulWidget {
   @override
@@ -22,15 +21,22 @@ class _ForeCastState extends State<ForeCast> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text("Top Cities Weather", style: TextStyle(fontFamily: "Raleway"),),
+        title: Text("Top Cities Weather", style: TextStyle(color:Colors.white, fontFamily: "Raleway"),),
         centerTitle: true,
+        leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, icon: Icon(Icons.arrow_back_ios, color: Colors.white,)),
       ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
+        padding: EdgeInsets.symmetric(
+          horizontal: size.width * 0.08,
+          vertical: size.height * 0.02,
+        ),
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Stack(
@@ -41,11 +47,11 @@ class _ForeCastState extends State<ForeCast> {
                   if(state is WeatherBlocLoading){
                     return Center(child: CircularProgressIndicator(),);
                   }
-                  else if(state is FiveDayForeCastSuccess){
+                  else if(state is TopCitiesWetherSuccess){
                     return ListView.builder(
-                      itemCount: state.fiveDayForecast.length,
+                      itemCount: state.weathers.length,
                       itemBuilder: (context, index){
-                        return WeatherCardFancy(weather: state.fiveDayForecast[index],);
+                        return WeatherCardFancy(weather: state.weathers[index],);
                       }
                     );
                   }
@@ -215,7 +221,7 @@ Widget build(BuildContext context) {
             top: -20,
             child: Image.asset(
               getWeatherImage(weather.weatherConditionCode!),
-              height: 180,
+              height: 150,
             ),
           ),
         ],
